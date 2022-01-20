@@ -57,7 +57,6 @@ app.get('/paste/:value', function (req, res) {
        app.post(`/paste/${req.params.value}`, function (req, res){
         var base_paste = CryptoJS.AES.decrypt(post.pass, req.body.password)
         base_paste.toString(CryptoJS.enc.Utf8)
-        console.log(base_paste.toString(CryptoJS.enc.Utf8))
         if(base_paste.toString(CryptoJS.enc.Utf8) === ""){
             res.render('./alert', {message: "Decryption failed, check the entered password",image:"wrong_pass.png"})
         }else{
@@ -119,6 +118,6 @@ res.send(`<script>window.location.replace("./paste/${post_id}");</script>`)
 
 })
 // Respostas servidor
-app.listen(3025, '192.168.1.69', function () {
-    console.log("Servidor Rodando http://192.168.1.69:3025")
+app.listen(3025, localhost, function () {
+    console.log("Servidor Rodando!")
 })
