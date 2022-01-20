@@ -118,6 +118,5 @@ res.send(`<script>window.location.replace("./paste/${post_id}");</script>`)
 
 })
 // Respostas servidor
-app.listen(3025, localhost, function () {
-    console.log("Servidor Rodando!")
-})
+const port = 3000;
+app.listen(process.env.PORT || port, () => console.log(`Running http://localhost:${port}`));
