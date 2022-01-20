@@ -1,0 +1,43 @@
+<head>
+  <title>{{title}} - CryptBin</title>
+</head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+  body {
+    background: #2c3338;
+    background-color: #2c3338;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+ 
+  }
+  .text_zone{
+        background: #1d2225;
+    background-color: #1d2225;
+       color: white;
+
+       padding: 15px;
+       font-family: 'Roboto', sans-serif;
+       margin: 25px;
+  }
+  label {
+    color: white;
+  }
+
+  #check:not(:checked)+#area {
+    display: none;
+  }
+
+  .logo {
+    margin: 2px;
+  }
+</style>
+
+<a href="../"><img width="200px" src="/images/logo.png" class="logo"></a>
+
+<div class="text_zone">
+  <center><h2>{{title}}</h2></center>
+<p>{{paste}}</p>
+</div>
+
+</div>
