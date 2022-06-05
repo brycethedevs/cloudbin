@@ -1,5 +1,5 @@
 //FrameWorks
-
+//teste
 const low = require('lowdb')
 var CryptoJS = require("crypto-js");
 const express = require("express");
