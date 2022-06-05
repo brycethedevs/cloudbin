@@ -51,7 +51,6 @@ app.get('/paste/:value', function (req, res) {
         .get("posts")
         .find({ id: req.params.value })
         .value()
-        console.log(`é ENCRIPTADO: `+post.crypted)
       if(post.crypted === true){
        res.render("./verification",{title: post.title,camin:post.id})
        app.post(`/paste/${req.params.value}`, function (req, res){
