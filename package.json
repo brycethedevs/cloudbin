@@ -1,17 +1,24 @@
 {
   "name": "Cryptbin",
-  "main":"index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node ."
+    "start": "node index.js"
   },
   "dependencies": {
     "body-parser": "^1.19.1",
+    "cookie-parser": "^1.4.6",
     "crypto-js": "^4.1.1",
     "express": "^4.17.2",
     "express-handlebars": "^6.0.2",
+    "express-rate-limit": "^6.7.0",
+    "express-session": "^1.17.3",
     "lowdb": "^1.0.0",
+    "mongoose": "^6.5.3",
     "nedb": "^1.8.0",
     "rangen": "^1.0.0",
-    "sweetalert": "^2.1.2"
+    "rate-limit-mongo": "^2.3.2",
+    "sweetalert": "^2.1.2",
+    "toobusy-js": "^0.5.1",
+    "uuid": "^9.0.0"
   }
 }

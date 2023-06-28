@@ -1,4 +1,4 @@
-//FrameWorks
+
 const low = require('lowdb')
 var CryptoJS = require("crypto-js");
 const express = require("express");
@@ -6,32 +6,57 @@ const app = express();
 const handlebars = require("express-handlebars");
 const bodyParser = require("body-parser")
 const rg = require('rangen');
-
-// Configurações banco de dados
+var toobusy = require("toobusy-js");
 const FileSync = require("lowdb/adapters/FileSync");
 const { use } = require('express/lib/application');
 const adapter = new FileSync("database/server.json");
 const db = low(adapter);
+const rateLimit = require('express-rate-limit')
+const MongoStore = require('rate-limit-mongo');
 
-// Configurações de renderização 
+const limiter = rateLimit({
+  store: new MongoStore({ 
+    uri: 'mongodb+srv://admin:bRYCE2007.@cluster.f6riahn.mongodb.net/?retryWrites=true&w=majority',
+    CollectionName:  'ratelimit'
+  }),
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: "my initial message",
+      handler: function(req, res /*, next*/) {
+    res.render('./rate')
+      },
+});
+app.use(function(req, res, next) {
+  if (toobusy()) {
+    res.send(503, "I'm busy right now, sorry.");
+  } else {
+    next();
+  }
+});
+ 
 
+app.use(limiter)
 var handle = handlebars.create({
     defaultLayout: 'main'
 });
-
+require("http").globalAgent.maxSockets = Infinity;
 app.use(express.static('public'));
-app.use('/images', express.static('images'));
+app.use('/', express.static('images'));
 app.engine('handlebars', handle.engine);
 
+
+
+app.use(express.json());
+
 app.set('view engine', 'handlebars');
-// Configurações BodyParser
+
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-// Rotas
+
 app.use('/uploads', express.static(__dirname + '/public'));
 
-// Pagina Login
+
 app.get('/', function (req, res) {
     res.render('./create')
 
@@ -39,10 +64,22 @@ app.get('/', function (req, res) {
 app.get('/alert', function (req, res) {
     res.render('./alert')
 })
-app.get('/paste', function (req, res) {
-    res.render('./alert', {message: "You need to enter a post ID in URL",image:"sorry.png"})
+app.get('/', function (req, res) {
+    res.render('./alert', {message: "You need to enter a post ID in URL"})
 })
-app.get('/paste/:value', function (req, res) {
+
+process.on("uncaughtException", function (err) {
+	console.log(err);
+});
+
+process.on("SIGINT", function() {
+  server.close();
+  toobusy.shutdown();
+  process.exit();
+});
+
+      
+app.get('/:value', function (req, res) {
     if (db.get('posts')
     .some(post => post.id === req.params.value)
     .value() === true) {
@@ -51,12 +88,12 @@ app.get('/paste/:value', function (req, res) {
         .find({ id: req.params.value })
         .value()
       if(post.crypted === true){
-       res.render("./verification",{title: post.title,camin:post.id})
-       app.post(`/paste/${req.params.value}`, function (req, res){
+       res.render("./verification",{camin:post.id})
+       app.post(`/${req.params.value}`, function (req, res){
         var base_paste = CryptoJS.AES.decrypt(post.pass, req.body.password)
         base_paste.toString(CryptoJS.enc.Utf8)
         if(base_paste.toString(CryptoJS.enc.Utf8) === ""){
-            res.render('./alert', {message: "Decryption failed, check the entered password",image:"wrong_pass.png"})
+            res.render('./alert', {message: "Decryption failed, check the entered password",image:"logo.png"})
         }else{
 
      
@@ -64,14 +101,12 @@ app.get('/paste/:value', function (req, res) {
     }
        })
       }else{
-          console.log(post.id)
         var base_paste = CryptoJS.AES.decrypt(post.pass, "12345678910")
          base_paste.toString(CryptoJS.enc.Utf8)
-         console.log(base_paste.toString(CryptoJS.enc.Utf8))
           res.render('./view', {paste: base_paste.toString(CryptoJS.enc.Utf8),title:post.title})
       }
     }
-   // res.render('./form_pass')
+
 })
 app.post('/view', function (req, res) {
 
@@ -80,41 +115,36 @@ app.post('/save', function (req, res) {
     let get = req.body
     const post_id = rg.id({length: 5, charSet: 'alphanum'});
 
-if(get.check === "true"){
-    if(get.paste.includes("<script>")){
-        res.render('./alert', {message: "You cannot host javascript codes",image:"sorry.png"})
+if(get.check === "false"){
+    if(get.paste.includes("")){
+        res.render('./alert', {message: "You cannot host javascript codes",image:"logo.png"})
     }else{
-console.log("ENCRIPTA")
 let iscrypted = true
 db.get("posts")
 .push({
     id: post_id,
-    title: get.author,
     crypted: iscrypted,
     pass: CryptoJS.AES.encrypt(get.paste, get.cryptpass).toString()
 
 }).write();
-res.send(`<script>window.location.replace("./paste/${post_id}");</script>`)
+res.send(`<script>window.location.replace("./${post_id}");</script>`)
     }
 }else{
     if(get.paste.includes("<script>")){
-        res.render('./alert', {message: "You cannot host javascript codes",image:"sorry.png"})
+        res.render('./alert', {message: "You cannot host javascript codes",image:"logo.png"})
     }else{
-    console.log("Não ENCRIPTA")
-    console.log(get.paste)
     let iscrypted = false
 db.get("posts")
 .push({
     id: post_id,
-    title: get.author,
     crypted: iscrypted,
     pass: CryptoJS.AES.encrypt(get.paste, "12345678910").toString()
 }).write();
-res.send(`<script>window.location.replace("./paste/${post_id}");</script>`)
+res.send(`<script>window.location.replace("./${post_id}");</script>`)
 }
 }
 
 })
-// Respostas servidor
-const port = 3000;
-app.listen(process.env.PORT || port, () => console.log(`Running http://localhost:${port}`));
+
+
+app.listen(3000)
